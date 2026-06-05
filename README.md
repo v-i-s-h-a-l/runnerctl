@@ -66,6 +66,7 @@ swift run runnerctl --home /tmp/runnerctl-smoke doctor --json
 Read in this order:
 
 - [Agent startup](docs/00-context/agent-startup.md)
+- [Change workflow](docs/04-operations/change-workflow.md)
 - [Project brief](docs/00-context/project-brief.md)
 - [Product vision](docs/01-product/product-vision.md)
 - [Goals and non-goals (locked scope)](docs/01-product/goals-and-non-goals.md)
@@ -95,3 +96,4 @@ Research artifacts:
 - Each machine is managed independently. No central control plane.
 - Safe defaults; private repositories only; warn loudly before public-PR scenarios.
 - CLI canonical for execution; agent layer preferred for user interaction.
+- Changes go through a task branch, sibling-agent plan review, sibling-agent implementation review, PR, auto-merge after checks pass, and local cleanup. Do not commit directly to `main`.
