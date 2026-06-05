@@ -10,7 +10,23 @@ AI-assisted development raises CI frequency and cost. Private repository runner 
 
 ## Status
 
-Product discovery is complete. Scope is locked. No implementation has started yet.
+M0 is complete: scope is locked and CLI UX decisions are documented.
+
+M1 implementation has started as a Swift Package Manager CLI. The current scaffold implements:
+
+- `runnerctl --help`
+- `runnerctl login` through existing `gh` credentials
+- `runnerctl doctor` with macOS local readiness checks
+- versioned local state under `~/.runnerctl` or `--home <path>`
+- JSON output for implemented commands
+
+Run locally:
+
+```sh
+swift run runnerctl --help
+swift run runnerctl --home /tmp/runnerctl-smoke login --json
+swift run runnerctl --home /tmp/runnerctl-smoke doctor --json
+```
 
 Read in this order:
 
@@ -19,11 +35,17 @@ Read in this order:
 - [Product vision](docs/01-product/product-vision.md)
 - [Goals and non-goals (locked scope)](docs/01-product/goals-and-non-goals.md)
 - [Architecture sketch](docs/03-architecture/architecture-sketch.md)
+- [Language decision](docs/03-architecture/language-decision.md)
 - [Product roadmap](docs/04-operations/plans/product-roadmap.md)
 
 Research artifacts:
 
 - [CLI UX research plan](docs/02-research/cli-ux-research-plan.md)
+- [CLI UX decisions](docs/02-research/cli-ux-decisions.md)
+- [CLI reference audit](docs/02-research/cli-reference-audit.md)
+- [Desk research findings](docs/02-research/desk-research-findings.md)
+- [Workflow archaeology](docs/02-research/workflow-archaeology.md)
+- [Dogfood journal](docs/02-research/dogfood-journal.md)
 - [Command walkthroughs (terminal transcripts)](docs/02-research/command-walkthroughs.md)
 - [AI coding agent conventions — findings](docs/02-research/agent-conventions-findings.md)
 - [Agent layer decisions](docs/02-research/agent-layer-decisions.md)
