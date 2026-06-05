@@ -2,7 +2,7 @@
 
 ## Objective
 
-Create a durable product discovery repository for GitHub Runner Hub and prepare it for future agent or human sessions.
+Create a durable product discovery repository for Runnerctl and prepare it for future agent or human sessions.
 
 ## Completed In This Setup Pass
 

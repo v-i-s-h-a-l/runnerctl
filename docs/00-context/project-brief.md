@@ -18,26 +18,34 @@ Self-hosted runners are free from GitHub Actions minute billing, but the real se
 
 ## Target Users
 
-- Individual developers with private GitHub repositories and a spare Mac mini, laptop, desktop, or small server.
-- Indie app developers building iOS/macOS projects.
-- AI-heavy developers who push frequent generated changes and want inexpensive CI.
-- Small teams or organizations that want shared self-hosted runner capacity without enterprise infrastructure.
+- Individual developers with private GitHub repositories and a spare Mac, Linux box, or homelab machine.
+- Indie Apple-platform developers who need macOS runners for Xcode-based CI.
+- AI-heavy developers who push frequent generated changes and want inexpensive CI on hardware they already own.
+- Small teams or organizations that want shared self-hosted runner capacity on trusted machines without enterprise infrastructure.
 
-## Initial Scope
+## Scope
 
-Focus on GitHub Actions self-hosted runners for private repositories and small organizations.
+A local CLI that manages the full lifecycle of GitHub Actions self-hosted runners on a single trusted machine, across any mix of repositories and organizations.
 
-First-class machine target: Mac mini running macOS, especially Apple Silicon.
+Supported hosts: macOS (Apple Silicon and Intel) first-class; Linux (x86_64 and ARM64, modern systemd distributions) second-class. Windows is out of scope.
 
-## Non-Goals For Now
+The CLI is installed per machine. Each machine is managed independently — there is no central control plane or cross-machine orchestration. Job-to-machine routing relies on GitHub Actions' existing label system; the tool sets correct defaults so the matching works.
+
+For the full scope lock, see `docs/01-product/product-vision.md` and `docs/01-product/goals-and-non-goals.md`.
+
+## Non-Goals
 
 - Replacing GitHub Actions.
 - Building a general CI/CD platform.
+- Workflow YAML scanning or modification.
+- Cross-machine orchestration or a central control plane.
+- Web dashboard or native GUI — the product is a CLI.
 - Running untrusted public pull request code safely on personal hardware.
 - Kubernetes-scale runner orchestration.
-- Full enterprise fleet management on day one.
+- Enterprise fleet governance.
+- Hosted SaaS layer or telemetry backend.
 
 ## Product Opportunity
 
-Build a tool that turns "I have a spare Mac mini" into "my private GitHub repositories reliably run Actions jobs on my own machine" with guided setup, workflow migration, runner health checks, safe defaults, and clear operational visibility.
+Turn "I have a spare machine" into "my private GitHub repositories reliably run Actions jobs on my own hardware" with one CLI: guided setup, multi-target registration, runner health checks, safe defaults, and clear local fleet visibility.
 

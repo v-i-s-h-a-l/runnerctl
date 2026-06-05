@@ -1,28 +1,38 @@
-# GitHub Runner Hub
+# Runnerctl
 
-GitHub Runner Hub is a product exploration for helping individuals and teams turn spare trusted machines, especially Mac minis, into reliable self-hosted GitHub Actions capacity.
+A local CLI that manages the full lifecycle of GitHub Actions self-hosted runners on a single trusted machine, across any mix of repositories and organizations, as one unified fleet on that machine.
 
-The immediate problem: AI-assisted development creates more frequent commits, generated tests, retries, and quality automation. For private repositories, GitHub-hosted runner minutes can disappear quickly. Self-hosted runners solve the compute-cost problem, but setup, routing, security, maintenance, and observability are still too manual.
+macOS (Apple Silicon and Intel) is first-class. Linux (x86_64 and ARM64, modern systemd distributions) is second-class. Windows is out of scope.
 
-This repository captures the product vision, user research plan, architecture options, and future implementation work for a tool that makes self-hosted GitHub Actions runners easy to set up and operate.
+## Why
 
-## Current Status
+AI-assisted development raises CI frequency and cost. Private repository runner minutes on GitHub-hosted infrastructure are limited and expensive — especially for macOS. Most developers already own idle compute: a Mac mini in a closet, a homelab Linux box, an old laptop kept on. Runnerctl turns that hardware into reliable private CI infrastructure, with one CLI that owns the full runner lifecycle (`add`, `doctor`, `status`, `repair`, `remove`, `update`) on the host machine.
 
-This repo is in product discovery and planning. No implementation has been started yet.
+## Status
 
-Start here:
+Product discovery is complete. Scope is locked. No implementation has started yet.
+
+Read in this order:
 
 - [Agent startup](docs/00-context/agent-startup.md)
 - [Project brief](docs/00-context/project-brief.md)
 - [Product vision](docs/01-product/product-vision.md)
-- [UX research plan](docs/02-research/ux-research-plan.md)
+- [Goals and non-goals (locked scope)](docs/01-product/goals-and-non-goals.md)
 - [Architecture sketch](docs/03-architecture/architecture-sketch.md)
+- [Product roadmap](docs/04-operations/plans/product-roadmap.md)
+
+Research artifacts:
+
+- [CLI UX research plan](docs/02-research/cli-ux-research-plan.md)
+- [Command walkthroughs (terminal transcripts)](docs/02-research/command-walkthroughs.md)
+- [AI coding agent conventions — findings](docs/02-research/agent-conventions-findings.md)
+- [Agent layer decisions](docs/02-research/agent-layer-decisions.md)
 
 ## Working Principles
 
-- Keep source-of-truth context agent-agnostic.
-- Use thin adapters for specific AI tools only when needed for discovery.
-- Design first for personal private repositories and small organizations.
-- Treat self-hosted runners as trusted infrastructure, not disposable cloud VMs.
-- Prefer clear setup, safe defaults, and observable operations over clever automation.
-
+- Keep source-of-truth context agent-agnostic; `AGENTS.md` is the universal file.
+- Minimal as the finished product, not a stepping stone.
+- macOS-first dogfooding; Linux is a real second backend, not a stretch goal.
+- Each machine is managed independently. No central control plane.
+- Safe defaults; private repositories only; warn loudly before public-PR scenarios.
+- CLI canonical; agent layer is a thin onboarding skin on top.

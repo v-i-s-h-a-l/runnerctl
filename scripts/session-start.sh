@@ -7,11 +7,11 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
 if [[ "$mode" == "--envrc" ]]; then
-  echo "GitHub Runner Hub: read docs/00-context/agent-startup.md before work."
+  echo "Runnerctl: read docs/00-context/agent-startup.md before work."
   exit 0
 fi
 
-echo "GitHub Runner Hub session startup"
+echo "Runnerctl session startup"
 echo
 echo "Read these first:"
 echo "  1. docs/00-context/agent-startup.md"

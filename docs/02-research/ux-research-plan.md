@@ -1,5 +1,7 @@
 # UX Research Plan
 
+> **Scope note (added after scope lock):** the product form is locked as a CLI. Questions about product form (CLI vs desktop app vs browser dashboard vs GitHub App) are no longer open and have been removed from the interview guide. CLI-specific design research is tracked in `cli-ux-research-plan.md`; this document covers the broader strategic questions about trust, mental model, and pain points.
+
 ## Research Goal
 
 Understand how individual developers and small teams think about self-hosted GitHub Actions runners, what blocks setup, and what experience would make a spare Mac mini feel like reliable CI infrastructure.
@@ -32,9 +34,9 @@ Understand how individual developers and small teams think about self-hosted Git
 5. If you had a Mac mini available, what would you expect setup to involve?
 6. What would make you trust the runner is working?
 7. What would make you worry the setup is unsafe?
-8. Would you prefer a CLI, desktop app, browser dashboard, or GitHub App?
-9. Would you let a tool open PRs to edit workflow files?
-10. What should happen when the Mac mini is offline?
+8. What scares you about a CLI tool installing OS-level services and minting GitHub registration tokens on your machine?
+9. Would you ever want a tool to open PRs to edit your workflow files, or do you prefer to control your YAML yourself?
+10. What should happen when the runner machine is offline?
 
 ## Prototype Concepts To Test
 

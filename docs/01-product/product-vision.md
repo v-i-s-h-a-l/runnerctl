@@ -2,53 +2,69 @@
 
 ## One-Sentence Vision
 
-Make self-hosted GitHub Actions runners feel like a managed local appliance for developers and small teams.
+A local CLI that manages the full lifecycle of GitHub Actions self-hosted runners on a single trusted machine, across any mix of repositories and organizations, as one unified fleet on that machine.
 
-## Expanded Vision
+## Why This Exists
 
-GitHub Actions is already the automation surface where developers run tests, builds, quality checks, releases, and maintenance jobs. AI coding increases the value of that automation while also increasing how often it runs. The result is a cost and capacity mismatch: developers want more CI, but private repository runner minutes remain scarce.
+AI-assisted development raises CI frequency and cost. Private repository runner minutes on GitHub-hosted infrastructure are limited and expensive — especially for macOS, where Apple-platform projects pay a heavy premium.
 
-Many developers already own idle compute. A Mac mini can be an excellent private CI box, especially for Apple-platform work. The missing layer is productization: setup guidance, safe registration, workflow routing, labels, service management, update checks, logs, health, and operational recovery.
+Most developers already own idle compute: a Mac mini in a closet, a homelab Linux box, an old laptop kept on. Turning those machines into reliable private CI infrastructure requires understanding repository vs organization runner scope, generating and using short-lived registration tokens, managing per-runner directories, configuring labels correctly, installing OS-level services, monitoring health, and surviving runner version drift.
 
-GitHub Runner Hub should become the control plane for that missing layer.
+No existing tool handles this lifecycle for a single trusted machine. The official `actions/runner` is per-runner, manual, and stateless. `actions-runner-controller` solves a Kubernetes-scale problem. SaaS offerings (Cirrus Runners, BuildJet) don't let the user own the machine. Scripts and Homebrew formulae stop at install — there is no fleet view, no doctor, no remove, no repair.
 
-## Product Pillars
+This product fills that gap.
 
-### Guided Setup
+## What It Is
 
-Help users connect GitHub repositories and organizations to a trusted local machine without needing to deeply understand every GitHub runner concept first.
+A single CLI binary, installed on each machine the user wants to use as a runner host. Each machine is managed independently. The CLI:
 
-### Workflow Routing
+- Authenticates the user with GitHub.
+- Registers runners against any mix of personal repositories, organization repositories, and organization-scope runners.
+- Configures each runner with sensible default labels and any user-specified custom labels.
+- Installs each runner as an OS-level service (launchd on macOS, systemd on Linux).
+- Tracks all runners on the machine in one local fleet view.
+- Diagnoses host readiness for the kinds of jobs the user wants to run.
+- Manages the full lifecycle: add, list, status, repair, remove, self-update.
 
-Detect workflows using `macos-latest`, `ubuntu-latest`, or other hosted labels and suggest safe edits to target self-hosted labels where appropriate.
+## User Surfaces
 
-### Local Machine Readiness
+The product is delivered through two complementary surfaces, both backed by the same underlying CLI.
 
-Verify operating system version, architecture, runner service status, disk space, Xcode installation, command line tools, simulators, keychains, signing identities, Homebrew dependencies, and network connectivity.
+### Surface 1 — The CLI
 
-### Fleet Visibility
+A single binary, installed per machine. Power users and scripts invoke `runnerctl` commands directly: `runnerctl login`, `runnerctl add <target>`, `runnerctl doctor`, `runnerctl status`, and so on. This is the canonical execution layer.
 
-Show which repositories and organizations are connected, which runner registrations exist, whether they are online, what labels they advertise, and what jobs they processed recently.
+### Surface 2 — The Agent-Native Layer
 
-### Safe Defaults
+When a user opens this repository inside any AI coding agent (Claude Code, Cursor, Aider, Codex CLI, GitHub Copilot, Cline, and others), the agent auto-orients to the project. Repository-level files — an `AGENTS.md` at the root, plus agent-specific assets where supported (Claude Code skills and slash commands, Cursor rules, an optional MCP server) — tell the agent:
 
-Treat self-hosted runners as trusted private infrastructure. Warn clearly about public repositories, fork pull requests, secret exposure, persistent workspaces, and concurrent Xcode jobs.
+- What this tool does and who uses it.
+- What actions are available (`add`, `doctor`, `status`, `repair`, and the rest).
+- How to translate natural-language intent ("set up a runner for my iOS repo") into specific CLI invocations.
+- When to offer a menu of next steps versus ask for clarification.
 
-### Maintenance Automation
+The CLI remains the canonical execution layer. The agent layer is documentation plus light scripting that points the agent at the CLI — never a duplicate execution path. The two surfaces reinforce each other: power users live in the CLI, conversational users live in their agent of choice, both run the same code.
 
-Automate common upkeep: runner updates, Xcode version drift checks, cache cleanup, service restart, stale registration detection, and log collection.
+## Supported Hosts
 
-## Possible Product Forms
+- **macOS** (Apple Silicon and Intel) — first-class. Ships first.
+- **Linux** (x86_64 and ARM64, modern systemd distributions) — second-class. Ships after macOS milestones are proven.
+- **Windows** — out of scope.
 
-- A local macOS app for setup and monitoring.
-- A CLI for automation-heavy users.
-- A lightweight local web dashboard.
-- A GitHub App that discovers repos, creates registration tokens, and opens pull requests to update workflow YAML.
-- A team edition with organization runner groups, access policies, and fleet health.
+## How Job-To-Machine Routing Works
 
-The first useful version can be a CLI plus local dashboard. A polished macOS app can follow after the setup model is proven.
+GitHub Actions already routes jobs to runners via labels. The tool sets correct defaults on each runner (`self-hosted`, `macOS` or `Linux`, `ARM64` or `X64`, plus an optional machine identifier) and lets users add custom labels. Workflows target `runs-on: [self-hosted, macOS, ARM64]` and GitHub does the matching.
 
-## Product Name Placeholder
+The tool does not invent a routing layer. This means one user can have a Mac mini that picks up iOS builds and a Linux box that picks up everything else, with no central coordinator — GitHub itself is the coordinator.
 
-Use `GitHub Runner Hub` as the descriptive working name. Rename later if the product direction sharpens.
+## Cross-Machine Model
 
+Each machine is managed independently. The CLI is installed per machine. There is no central control plane, no SSH-from-laptop orchestration, no shared state across machines. Multi-machine fleets exist only in the sense that GitHub's own runner listing shows them all together.
+
+## What "Minimal And Finished" Means
+
+The product is intentionally bounded. It does one thing: lifecycle management of self-hosted runners on a single machine. The vision is not to grow into a CI platform, a fleet manager across many machines, a workflow editor, or a SaaS dashboard. The success condition is that this small surface is excellent — fast, safe, idempotent, repairable, and honest about what it does.
+
+## Name
+
+The product and the CLI binary are both `runnerctl` (lowercase as a binary, `Runnerctl` in prose). The name follows the `kubectl` / `systemctl` / `talosctl` convention: a tool that controls a specific class of resource. Repo name: `runnerctl`.
