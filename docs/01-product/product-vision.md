@@ -36,14 +36,14 @@ A single binary, installed per machine. Power users and scripts invoke `runnerct
 
 ### Surface 2 — The Agent-Native Layer
 
-When a user opens this repository inside any AI coding agent (Claude Code, Cursor, Aider, Codex CLI, GitHub Copilot, Cline, and others), the agent auto-orients to the project. Repository-level files — an `AGENTS.md` at the root, plus agent-specific assets where supported (Claude Code skills and slash commands, Cursor rules, an optional MCP server) — tell the agent:
+When a user opens this repository inside any AI coding agent that understands repository instructions, the agent orients to the project through `AGENTS.md` and the canonical context under `docs/`. In user target repositories, `runnerctl agents init` can generate thin per-agent adapters where useful. These files tell the agent:
 
 - What this tool does and who uses it.
 - What actions are available (`add`, `doctor`, `status`, `repair`, and the rest).
 - How to translate natural-language intent ("set up a runner for my iOS repo") into specific CLI invocations.
 - When to offer a menu of next steps versus ask for clarification.
 
-The CLI remains the canonical execution layer. The agent layer is documentation plus light scripting that points the agent at the CLI — never a duplicate execution path. The two surfaces reinforce each other: power users live in the CLI, conversational users live in their agent of choice, both run the same code.
+The CLI remains the canonical execution layer. The agent layer is documentation plus generated adapters that point the agent at the CLI — never a duplicate execution path. The two surfaces reinforce each other: power users live in the CLI, conversational users live in their agent of choice, both run the same code.
 
 ## Supported Hosts
 

@@ -22,11 +22,12 @@ At the beginning of any new session:
 
 ## Startup Automation
 
-`AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, and `.github/copilot-instructions.md` all point to this canonical startup routine.
+`AGENTS.md` and `CLAUDE.md` point to this canonical startup routine.
 
 `.envrc` also calls `./scripts/session-start.sh --envrc` when `direnv` is installed and allowed for this repository. This is best-effort shell automation; agents that do not support these conventions should still follow this file manually.
+
+The source repository intentionally ships only `AGENTS.md` plus the maintainer's thin `CLAUDE.md` adapter. Other per-agent adapter files are generated in user target repositories later by `runnerctl agents init`; they are not committed here.
 
 ## Current Product Thesis
 
 AI-assisted development increases CI frequency and cost. Many individuals and small teams own spare trusted machines that can run private repository automation. A focused product can make self-hosted GitHub Actions runners easier to configure, route, monitor, secure, and maintain.
-

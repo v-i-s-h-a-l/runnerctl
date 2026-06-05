@@ -19,7 +19,7 @@ runnerctl CLI (per-machine, host-agnostic core)
    |
    |--- agent onboarding layer
            AGENTS.md, CLAUDE.md (shipped in this repo)
-           scripts/session-start.sh (terse JSON when --agent set)
+           scripts/session-start.sh (hardened in M1)
            runnerctl agents init (generates per-agent adapters in user repos)
 ```
 
@@ -34,11 +34,12 @@ runnerctl CLI (per-machine, host-agnostic core)
 
 ## GitHub Integration
 
-Authentication uses one or more of (final decision in `cli-ux-decisions.md`):
+Authentication uses the layered flow locked in `cli-ux-decisions.md`:
 
-- Reuse the `gh` CLI session if present.
-- OAuth device flow.
-- Personal access token paste.
+- Reuse a valid `gh` CLI credential when present.
+- Fall back to OAuth device/browser login.
+- Support token input for automation.
+- Support named profiles so personal and work GitHub identities can coexist on one machine.
 
 A GitHub App is explicitly **not** in scope — it would add an account-system layer that conflicts with the "single trusted machine" framing.
 
@@ -74,12 +75,14 @@ The core CLI logic (GitHub API, state, lifecycle, label management) is host-agno
 ```text
 ~/.runnerctl/
   state.json                     # versioned local state schema
+  logs/
+  cache/
   runners/
     repo-owner-repo-a/
     org-example/
 ```
 
-On Linux, the user-config base honors XDG conventions when set; final path locked in `cli-ux-decisions.md`.
+The default home is `~/.runnerctl` on all supported hosts. It can be overridden with `RUNNERCTL_HOME` or `--home`.
 
 Each runner registration gets its own working directory, OS service, and label set. The product does not enable parallel runners on one machine by default; concurrency is opt-in.
 
@@ -87,9 +90,9 @@ Each runner registration gets its own working directory, OS service, and label s
 
 The agent-orchestration goal (#10) is delivered through:
 
-- **`AGENTS.md` at repo root** — universal cross-agent source of truth. Six fixed sections: project identity, hard safety rules, canonical command menu, NL→command routing table, agent-output contract, pointer to canonical context.
-- **`CLAUDE.md` at repo root** — thin adapter pointing at `docs/00-context/agent-startup.md` (mirrors the existing convention).
-- **`scripts/session-start.sh`** — emits terse JSON status when `--agent` is set or any vendor session env var is detected (`CLAUDECODE`, `CLINE_ACTIVE`, `CURSOR_PROJECT_DIR`, `RUNNERHUB_AGENT`).
+- **`AGENTS.md` at repo root** — universal cross-agent source of truth, pointing at the canonical docs.
+- **`CLAUDE.md` at repo root** — thin adapter for maintainer dogfooding.
+- **`scripts/session-start.sh`** — read-only startup helper; M1 hardens it to emit terse JSON status when `--agent` is set or any vendor session env var is detected (`CLAUDECODE`, `CLINE_ACTIVE`, `CURSOR_PROJECT_DIR`, `RUNNERHUB_AGENT`).
 - **`runnerctl agents init`** — CLI subcommand that detects installed AI coding agents (Claude Code, Cursor, Codex CLI, GitHub Copilot, Cline, Aider) on the current machine and generates per-agent adapter files in the user's current repository. Idempotent.
 
 Explicitly absent (see `agent-layer-decisions.md`): skill files, SessionStart hooks for any agent, MCP server.
