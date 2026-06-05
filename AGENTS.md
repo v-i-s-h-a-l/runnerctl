@@ -18,6 +18,22 @@ Then run the read-only startup helper for current status:
 
 All durable project memory belongs under `docs/`. Do not store important context only in one agent's private memory.
 
+## Change Workflow
+
+For any file-changing work, follow [Change workflow](docs/04-operations/change-workflow.md).
+
+Non-negotiables:
+
+- Never commit directly to `main`.
+- Check branch and worktree status before editing.
+- Create a task branch or worktree before changing files.
+- Create or update a plan under `docs/04-operations/plans/`.
+- Get sibling-agent plan review with explicit `PASS` before implementation.
+- Get sibling-agent implementation review with explicit `PASS` before PR creation.
+- Push the branch and create a PR.
+- Ask the user for explicit approval before merging.
+- After merge, sync `main`, delete the local task branch/worktree, and remove scratch artifacts.
+
 ## Current Command Surface
 
 Use `--json` for Runnerctl commands whenever possible.
