@@ -11,7 +11,7 @@ At the beginning of any new session:
 3. Read the most relevant files under `docs/01-product/`, `docs/02-research/`, and `docs/03-architecture/`.
 4. Run `./scripts/session-start.sh` to view current repository status.
 5. Before implementation, create or update a short plan artifact under `docs/04-operations/plans/`.
-6. For any file-changing work, follow `docs/04-operations/change-workflow.md`: work on a task branch, get sibling-agent plan review before implementation, get sibling-agent implementation review before PR creation, and never commit directly to `main`.
+6. For any file-changing work, follow `docs/04-operations/change-workflow.md`: work on a task branch, get sibling-agent plan review before implementation, get sibling-agent implementation review before PR creation, create a PR, auto-merge after checks pass, clean up locally, and never commit directly to `main`.
 
 ## Durable Memory Rules
 

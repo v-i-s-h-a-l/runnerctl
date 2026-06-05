@@ -31,7 +31,9 @@ Non-negotiables:
 - Get sibling-agent plan review with explicit `PASS` before implementation.
 - Get sibling-agent implementation review with explicit `PASS` before PR creation.
 - Push the branch and create a PR.
-- Ask the user for explicit approval before merging.
+- Merge automatically after implementation review passes, required checks pass, and the PR is mergeable.
+- If checks are pending, enable platform auto-merge when available.
+- Stop before merge only if the user explicitly asks.
 - After merge, sync `main`, delete the local task branch/worktree, and remove scratch artifacts.
 
 ## Current Command Surface

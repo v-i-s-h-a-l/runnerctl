@@ -11,7 +11,7 @@ Define a lightweight repository workflow for future changes:
 - implement only after plan review passes;
 - get a sibling-agent review of the implementation;
 - create a PR;
-- merge the PR;
+- merge the PR automatically after reviews/checks pass;
 - sync local branches and clean up local work artifacts.
 
 ## Scope
@@ -42,15 +42,17 @@ It does not need a full PR cycle for purely read-only status checks or user ques
 11. Ask a sibling agent to review the implementation. The review must return `PASS` or `FAIL`, list blocking issues, and recommend specific changes.
 12. If implementation review fails, fix and repeat review before PR creation.
 13. Push the branch and create a PR.
-14. If implementation review passes, ask the user for explicit merge approval.
-15. Merge the PR only after user approval.
+14. After PR creation, merge automatically once the PR is mergeable and required checks have passed.
+15. If the PR cannot merge immediately because required checks are pending, enable platform auto-merge where available.
 16. After merge, switch back to `main`, pull, delete the local branch, and remove temporary worktrees or scratch artifacts.
 
 ## Merge Policy
 
-Agents create PRs automatically after implementation review passes. Agents do not merge automatically. They must ask the user for explicit merge approval after the PR exists and review has passed.
+Agents create PRs automatically after implementation review passes. Agents also merge automatically once the PR is mergeable and required checks have passed.
 
-If the user has already explicitly requested merge for the current PR after review passes, the agent may merge the PR and then perform sync/cleanup.
+If checks are pending and the host supports platform auto-merge, agents enable auto-merge and then wait for merge completion before syncing and cleaning up when practical.
+
+If the user explicitly asks the agent to stop before merge, the agent creates the PR and reports that it is ready instead of merging.
 
 ## Review Evidence
 
@@ -78,5 +80,5 @@ Each review record should include:
 - The workflow requires plan review before implementation.
 - The workflow requires implementation review before PR creation.
 - The workflow requires PR creation for repository changes.
-- The workflow requires explicit user approval before merge.
+- The workflow requires auto-merge after implementation review passes and the PR is mergeable.
 - The workflow requires syncing `main` and deleting local task branches/worktrees after merge.

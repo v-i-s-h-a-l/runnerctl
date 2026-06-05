@@ -96,4 +96,4 @@ Research artifacts:
 - Each machine is managed independently. No central control plane.
 - Safe defaults; private repositories only; warn loudly before public-PR scenarios.
 - CLI canonical for execution; agent layer preferred for user interaction.
-- Changes go through a task branch, sibling-agent plan review, sibling-agent implementation review, and PR. Do not commit directly to `main`.
+- Changes go through a task branch, sibling-agent plan review, sibling-agent implementation review, PR, auto-merge after checks pass, and local cleanup. Do not commit directly to `main`.

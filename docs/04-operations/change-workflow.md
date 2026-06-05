@@ -64,7 +64,11 @@ Read-only status checks and explanatory answers do not need a branch or PR if th
     gh pr create
     ```
 
-12. Ask the user for explicit approval before merging.
+12. Merge automatically once implementation review has passed, required checks have passed, and the PR is mergeable.
+
+    If required checks are still pending and platform auto-merge is available, enable auto-merge and wait for the merge to complete when practical.
+
+    If the user explicitly asks the agent to stop before merge, leave the PR open and report that it is ready.
 
 13. After merge, sync local `main` and clean up local artifacts.
 
@@ -80,7 +84,11 @@ Read-only status checks and explanatory answers do not need a branch or PR if th
 
 Agents may create PRs after implementation review passes.
 
-Agents must not merge PRs unless the user explicitly approves the merge for the current PR. If the user has already asked for the PR to be merged after reviews pass, the agent may merge and then perform sync/cleanup.
+Agents should merge automatically after implementation review passes, required checks pass, and the PR is mergeable.
+
+If checks are pending and the hosting platform supports auto-merge, agents should enable auto-merge. If checks fail or the PR is not mergeable, agents must report the blocker and stop.
+
+If the user explicitly asks the agent to stop before merge, agents must create the PR and wait.
 
 ## Review Evidence
 
@@ -107,5 +115,5 @@ Use short purpose-oriented branch names:
 - Do not commit directly to `main`.
 - Do not implement before plan review passes.
 - Do not create a PR before implementation review passes.
-- Do not merge without explicit user approval.
+- Do not merge before implementation review and required checks pass.
 - Do not leave local task branches, worktrees, or scratch artifacts behind after merge.
