@@ -5,6 +5,7 @@ public struct RunnerctlApp {
     private let output: OutputWriting
     private let errorOutput: OutputWriting
     private let executor: CommandExecuting
+    private let githubTransport: GitHubAPITransport
     private let environment: [String: String]
 
     /// Creates a Runnerctl application using process-backed dependencies.
@@ -12,6 +13,7 @@ public struct RunnerctlApp {
         self.output = StandardOutput()
         self.errorOutput = StandardError()
         self.executor = ProcessCommandExecutor()
+        self.githubTransport = URLSessionGitHubAPITransport()
         self.environment = ProcessInfo.processInfo.environment
     }
 
@@ -20,11 +22,13 @@ public struct RunnerctlApp {
         output: OutputWriting = StandardOutput(),
         errorOutput: OutputWriting = StandardError(),
         executor: CommandExecuting = ProcessCommandExecutor(),
+        githubTransport: GitHubAPITransport = URLSessionGitHubAPITransport(),
         environment: [String: String] = ProcessInfo.processInfo.environment
     ) {
         self.output = output
         self.errorOutput = errorOutput
         self.executor = executor
+        self.githubTransport = githubTransport
         self.environment = environment
     }
 
@@ -68,6 +72,7 @@ public struct RunnerctlApp {
             let options = try LoginOptions.parse(invocation.commandArguments)
             let detector = GitHubCLICredentialDetector(executor: executor)
             let credential = try detector.detectCredential(account: options.account)
+            let targetCheck = try runTargetCheckIfNeeded(options: options, credential: credential)
 
             var state = try stateStore.loadOrCreate()
             state.upsertProfile(Profile(
@@ -88,6 +93,7 @@ public struct RunnerctlApp {
                 githubLogin: credential.login,
                 hostname: credential.hostname,
                 credentialSource: "gh",
+                targetCheck: targetCheck,
                 warnings: credential.warnings,
                 errors: []
             )
@@ -102,6 +108,7 @@ public struct RunnerctlApp {
                 Account:  \(response.githubLogin)
                 Host:     \(response.hostname)
                 Source:   gh
+                \(targetCheck.map { "\nTarget:   \($0.target) (\($0.scope)) runner API access verified." } ?? "")
 
                 Next: run `runnerctl doctor`.
                 """)
@@ -112,6 +119,16 @@ public struct RunnerctlApp {
         } catch {
             return renderCommandError(.unexpected(String(describing: error)), json: invocation.global.json, command: "login")
         }
+    }
+
+    private func runTargetCheckIfNeeded(options: LoginOptions, credential: GitHubCredential) throws -> TargetPermissionCheck? {
+        guard let rawTarget = options.checkTarget else {
+            return nil
+        }
+
+        let target = try GitHubTarget(rawTarget, scope: options.scope)
+        let token = try GitHubCLITokenProvider(executor: executor).token(for: credential)
+        return try GitHubRunnerAPIClient(transport: githubTransport).checkRunnerPermissions(for: target, token: token)
     }
 
     private func runDoctor(invocation: ParsedInvocation, stateStore: StateStore) -> Int {
@@ -202,5 +219,10 @@ public struct RunnerctlApp {
       --yes              Skip interactive confirmations.
       --profile <name>   Use a named GitHub profile.
       --home <path>      Use an alternate runnerctl home directory.
+
+    Login options:
+      --account <login>          Use a specific GitHub CLI account.
+      --check-target <target>    Verify runner API access for owner/repo or org.
+      --scope repo|org           Disambiguate the target scope.
     """
 }

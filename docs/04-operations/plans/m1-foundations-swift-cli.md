@@ -31,6 +31,14 @@ This decision is reversible before M2 only if a concrete toolchain/distribution 
 5. Implement `runnerctl doctor` with macOS checks for architecture, launchd, disk, command line tools, Xcode license, network, state directory, and existing runner directories.
 6. Add basic unit tests for command parsing and state round trip.
 
+## Current Checkpoint
+
+- Swift package scaffold exists.
+- `runnerctl login` detects and stores a `gh` profile.
+- `runnerctl login --check-target <owner/repo|org>` verifies runner API access by listing runners and creating then discarding a registration token.
+- `runnerctl doctor` runs initial macOS checks.
+- `scripts/session-start.sh --agent` emits terse JSON.
+
 ## Out Of Scope For This Pass
 
 - OAuth device flow.

@@ -184,5 +184,5 @@ These are not on this roadmap and will not appear in any future revision of it. 
 ## Where We Are Right Now
 
 - M0 is complete. Scope is locked and `cli-ux-decisions.md` exists.
-- M1 is in progress. Swift has been chosen for the first implementation pass. The package scaffold exists, `login` plus macOS `doctor` have initial implementations, and `scripts/session-start.sh --agent` emits terse JSON.
-- Next stage: deepen `login` from local `gh` credential detection into target-specific repository and organization runner permission checks, then expand `doctor` failure coverage and prepare private Homebrew dogfooding.
+- M1 is in progress. Swift has been chosen for the first implementation pass. The package scaffold exists, `login` plus macOS `doctor` have initial implementations, `scripts/session-start.sh --agent` emits terse JSON, and `login --check-target` verifies repository or organization runner API permissions.
+- Next stage: expand `doctor` failure coverage, then prepare private Homebrew dogfooding.

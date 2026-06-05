@@ -66,6 +66,8 @@ struct CommandParser {
 struct LoginOptions: Equatable {
     var profile: String?
     var account: String?
+    var checkTarget: String?
+    var scope: String?
 
     /// Parses login-specific options.
     static func parse(_ arguments: [String]) throws -> LoginOptions {
@@ -86,6 +88,21 @@ struct LoginOptions: Equatable {
                     throw RunnerctlError.usage("Missing value for --account.")
                 }
                 options.account = arguments[index]
+            case "--check-target":
+                index += 1
+                guard index < arguments.count else {
+                    throw RunnerctlError.usage("Missing value for --check-target.")
+                }
+                options.checkTarget = arguments[index]
+            case "--scope":
+                index += 1
+                guard index < arguments.count else {
+                    throw RunnerctlError.usage("Missing value for --scope.")
+                }
+                guard ["repo", "org"].contains(arguments[index]) else {
+                    throw RunnerctlError.usage("--scope must be `repo` or `org`.")
+                }
+                options.scope = arguments[index]
             case "--hostname", "--with-token", "--refresh":
                 throw RunnerctlError.usage("`\(arguments[index])` is documented for login but is not implemented in this M1 scaffold.")
             default:

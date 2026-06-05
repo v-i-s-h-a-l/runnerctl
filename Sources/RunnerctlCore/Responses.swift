@@ -25,6 +25,15 @@ struct LoginResponse: Codable, Equatable {
     var githubLogin: String
     var hostname: String
     var credentialSource: String
+    var targetCheck: TargetPermissionCheck?
     var warnings: [String]
     var errors: [CommandError]
+}
+
+/// JSON details for a target-specific GitHub runner permission check.
+struct TargetPermissionCheck: Codable, Equatable {
+    var target: String
+    var scope: String
+    var listRunners: Bool
+    var createRegistrationToken: Bool
 }
