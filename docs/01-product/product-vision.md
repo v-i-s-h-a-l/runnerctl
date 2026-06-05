@@ -30,11 +30,9 @@ A single CLI binary, installed on each machine the user wants to use as a runner
 
 The product is delivered through two complementary surfaces, both backed by the same underlying CLI.
 
-### Surface 1 — The CLI
+### Surface 1 — The Agent-Native Layer
 
-A single binary, installed per machine. Power users and scripts invoke `runnerctl` commands directly: `runnerctl login`, `runnerctl add <target>`, `runnerctl doctor`, `runnerctl status`, and so on. This is the canonical execution layer.
-
-### Surface 2 — The Agent-Native Layer
+The recommended user experience is agent-first. The user clones this repository onto the runner host machine, opens the repository in an AI coding agent, and asks for runner lifecycle work in natural language.
 
 When a user opens this repository inside any AI coding agent that understands repository instructions, the agent orients to the project through `AGENTS.md` and the canonical context under `docs/`. In user target repositories, `runnerctl agents init` can generate thin per-agent adapters where useful. These files tell the agent:
 
@@ -43,7 +41,13 @@ When a user opens this repository inside any AI coding agent that understands re
 - How to translate natural-language intent ("set up a runner for my iOS repo") into specific CLI invocations.
 - When to offer a menu of next steps versus ask for clarification.
 
-The CLI remains the canonical execution layer. The agent layer is documentation plus generated adapters that point the agent at the CLI — never a duplicate execution path. The two surfaces reinforce each other: power users live in the CLI, conversational users live in their agent of choice, both run the same code.
+The user should not need to remember commands for normal operation. The agent explains what it is doing, runs the underlying CLI, and reports results in plain English.
+
+### Surface 2 — The CLI
+
+A single binary, installed per machine. Power users and scripts invoke `runnerctl` commands directly: `runnerctl login`, `runnerctl add <target>`, `runnerctl doctor`, `runnerctl status`, and so on. This is the canonical execution layer.
+
+The CLI remains the canonical execution layer. The agent layer is documentation plus generated adapters that point the agent at the CLI — never a duplicate execution path. The two surfaces reinforce each other: conversational users live in their agent of choice, power users live in the CLI, both run the same code.
 
 ## Supported Hosts
 

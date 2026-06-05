@@ -185,4 +185,5 @@ These are not on this roadmap and will not appear in any future revision of it. 
 
 - M0 is complete. Scope is locked and `cli-ux-decisions.md` exists.
 - M1 is in progress. Swift has been chosen for the first implementation pass. The package scaffold exists, `login` plus macOS `doctor` have initial implementations, `scripts/session-start.sh --agent` emits terse JSON, `login --check-target` verifies repository or organization runner API permissions, and `doctor` now reports corrupt state, unavailable saved profiles, missing runner directories, and missing runner executables.
-- Next stage: prepare private Homebrew dogfooding.
+- Agent-first onboarding is the recommended user model: users should be able to clone the repo, open it in an AI agent, ask naturally, and let the agent run the underlying CLI.
+- Next stage: prepare private Homebrew dogfooding while keeping agent-first usage as the documented path.

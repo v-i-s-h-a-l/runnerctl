@@ -30,7 +30,7 @@ runnerctl CLI (per-machine, host-agnostic core)
 - **Local state directory** — records registered repos/orgs, runner directories, labels, service names, last health check. Plain-text, human-readable, versioned schema.
 - **Health checker (`doctor`)** — host-specific readiness diagnostics with copy-pasteable remediation.
 - **Service manager** — wraps OS-native service install / start / stop / uninstall through the host backend.
-- **Agent onboarding layer** — `AGENTS.md` and `CLAUDE.md` shipped in the runnerctl source repo; `runnerctl agents init` generates per-agent adapters in user target repos based on detected agents.
+- **Agent onboarding layer** — preferred user-facing interaction model. `AGENTS.md` and `CLAUDE.md` ship in the runnerctl source repo; `runnerctl agents init` generates per-agent adapters in user target repos based on detected agents.
 
 ## GitHub Integration
 
@@ -90,7 +90,7 @@ Each runner registration gets its own working directory, OS service, and label s
 
 The agent-orchestration goal (#10) is delivered through:
 
-- **`AGENTS.md` at repo root** — universal cross-agent source of truth, pointing at the canonical docs.
+- **`AGENTS.md` at repo root** — universal cross-agent source of truth, including natural-language routing examples and pointers to canonical docs.
 - **`CLAUDE.md` at repo root** — thin adapter for maintainer dogfooding.
 - **`scripts/session-start.sh`** — read-only startup helper; M1 hardens it to emit terse JSON status when `--agent` is set or any vendor session env var is detected (`CLAUDECODE`, `CLINE_ACTIVE`, `CURSOR_PROJECT_DIR`, `RUNNERHUB_AGENT`).
 - **`runnerctl agents init`** — CLI subcommand that detects installed AI coding agents (Claude Code, Cursor, Codex CLI, GitHub Copilot, Cline, Aider) on the current machine and generates per-agent adapter files in the user's current repository. Idempotent.

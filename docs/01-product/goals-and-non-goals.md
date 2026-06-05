@@ -17,7 +17,7 @@ It supersedes the earlier MVP framing in `mvp-scope.md`.
 7. **Runner version maintenance** — detect when the registered runner binary has fallen out of GitHub's supported window and update it cleanly.
 8. **Safe defaults** — private repositories only by default, clear warnings before public-repo or fork-PR scenarios, no persistent secrets stored beyond what is strictly required.
 9. **Distribution polish** — install via Homebrew (macOS) and release tarball or shell installer (Linux). A stranger can install and use it without contacting the maintainer.
-10. **Agent-orchestration onboarding layer** — when a user opens a repository inside an AI coding agent, the agent can use `AGENTS.md` or generated thin adapters to understand the available runner-lifecycle actions and route natural-language intent ("set up a runner for my iOS repo") to the underlying CLI. The CLI remains the canonical execution layer; the agent layer is documentation plus dynamic adapter generation, never a duplicate execution path.
+10. **Agent-orchestration onboarding layer** — the recommended interaction model is natural language inside an AI coding agent. When a user opens a repository inside an agent, the agent can use `AGENTS.md` or generated thin adapters to understand the available runner-lifecycle actions and route intent ("set up a runner for my iOS repo") to the underlying CLI. The CLI remains the canonical execution layer; the agent layer is documentation plus dynamic adapter generation, never a duplicate execution path.
 
 ### Secondary Goals
 
