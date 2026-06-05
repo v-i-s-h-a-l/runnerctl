@@ -68,6 +68,21 @@ struct StateStore {
         }
     }
 
+    /// Loads state if the state file exists.
+    func loadExisting() throws -> RunnerctlState? {
+        try ensureDirectories()
+        guard FileManager.default.fileExists(atPath: stateFilePath) else {
+            return nil
+        }
+
+        do {
+            let data = try Data(contentsOf: URL(fileURLWithPath: stateFilePath))
+            return try JSONDecoder.runnerctl.decode(RunnerctlState.self, from: data)
+        } catch {
+            throw RunnerctlError.state("Could not read Runnerctl state at \(stateFilePath): \(error)")
+        }
+    }
+
     /// Saves state to disk.
     func save(_ state: RunnerctlState) throws {
         try ensureDirectories()
@@ -87,7 +102,7 @@ struct StateStore {
         try save(state)
     }
 
-    private func ensureDirectories() throws {
+    func ensureDirectories() throws {
         do {
             try FileManager.default.createDirectory(atPath: homePath, withIntermediateDirectories: true)
             try FileManager.default.createDirectory(atPath: "\(homePath)/logs", withIntermediateDirectories: true)

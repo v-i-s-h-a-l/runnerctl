@@ -17,7 +17,7 @@ M1 implementation has started as a Swift Package Manager CLI. The current scaffo
 - `runnerctl --help`
 - `runnerctl login` through existing `gh` credentials
 - `runnerctl login --check-target <owner/repo|org>` permission checks for GitHub runner APIs
-- `runnerctl doctor` with macOS local readiness checks
+- `runnerctl doctor` with macOS local readiness checks and state/runner failure detection
 - versioned local state under `~/.runnerctl` or `--home <path>`
 - JSON output for implemented commands
 

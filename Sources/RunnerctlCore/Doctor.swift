@@ -56,7 +56,15 @@ struct Doctor {
         checks.append(checkXcodeLicense())
         checks.append(checkGitHubNetwork())
         checks.append(checkStateDirectory())
-        checks.append(contentsOf: checkRunnerDirectories())
+
+        switch loadStateForChecks() {
+        case .loaded(let state):
+            checks.append(contentsOf: checkProfiles(in: state))
+            checks.append(contentsOf: checkRunnerDirectories(in: state))
+        case .failed(let check):
+            checks.append(check)
+        }
+
         return checks
     }
 
@@ -135,23 +143,75 @@ struct Doctor {
         if FileManager.default.fileExists(atPath: stateStore.stateFilePath) {
             return DoctorCheck(id: "state.file", label: "State file", severity: .info, message: stateStore.stateFilePath, fix: nil)
         }
-        return DoctorCheck(id: "state.file", label: "State file", severity: .fail, message: "State file does not exist at \(stateStore.stateFilePath).", fix: "Run `runnerctl doctor` again or check permissions for RUNNERCTL_HOME.")
+        return DoctorCheck(id: "state.file", label: "State file", severity: .info, message: "No state file yet at \(stateStore.stateFilePath).", fix: nil)
     }
 
-    private func checkRunnerDirectories() -> [DoctorCheck] {
+    private enum StateLoadResult {
+        case loaded(RunnerctlState?)
+        case failed(DoctorCheck)
+    }
+
+    private func loadStateForChecks() -> StateLoadResult {
         do {
-            let state = try stateStore.loadOrCreate()
-            guard !state.runners.isEmpty else {
-                return [DoctorCheck(id: "runners.none", label: "Runners", severity: .info, message: "No runners registered yet.", fix: nil)]
-            }
-            return state.runners.map { runner in
-                if FileManager.default.fileExists(atPath: runner.directory) {
-                    return DoctorCheck(id: "runner.directory.\(runner.name)", label: "Runner directory", severity: .info, message: "\(runner.target): \(runner.directory)", fix: nil)
-                }
-                return DoctorCheck(id: "runner.directory.\(runner.name)", label: "Runner directory", severity: .fail, message: "\(runner.target): missing \(runner.directory)", fix: "Run `runnerctl repair \(runner.target)`.")
-            }
+            return .loaded(try stateStore.loadExisting())
         } catch {
-            return [DoctorCheck(id: "runners.state", label: "Runners", severity: .fail, message: "Could not load runner state: \(error)", fix: "Inspect \(stateStore.stateFilePath).")]
+            return .failed(DoctorCheck(
+                id: "state.parse",
+                label: "State parse",
+                severity: .fail,
+                message: "Could not parse \(stateStore.stateFilePath): \(error)",
+                fix: "Repair or remove \(stateStore.stateFilePath), then run `runnerctl doctor` again."
+            ))
+        }
+    }
+
+    private func checkRunnerDirectories(in state: RunnerctlState?) -> [DoctorCheck] {
+        guard let state, !state.runners.isEmpty else {
+            return [DoctorCheck(id: "runners.none", label: "Runners", severity: .info, message: "No runners registered yet.", fix: nil)]
+        }
+
+        return state.runners.flatMap { runner in
+            checkRunnerDirectory(runner)
+        }
+    }
+
+    private func checkRunnerDirectory(_ runner: RunnerRecord) -> [DoctorCheck] {
+        guard FileManager.default.fileExists(atPath: runner.directory) else {
+            return [DoctorCheck(id: "runner.directory.\(runner.name)", label: "Runner directory", severity: .fail, message: "\(runner.target): missing \(runner.directory)", fix: "Run `runnerctl repair \(runner.target)`.")]
+        }
+
+        var checks = [
+            DoctorCheck(id: "runner.directory.\(runner.name)", label: "Runner directory", severity: .info, message: "\(runner.target): \(runner.directory)", fix: nil)
+        ]
+
+        if FileManager.default.isWritableFile(atPath: runner.directory) {
+            checks.append(DoctorCheck(id: "runner.directory_writable.\(runner.name)", label: "Runner directory permissions", severity: .info, message: "\(runner.target): writable.", fix: nil))
+        } else {
+            checks.append(DoctorCheck(id: "runner.directory_writable.\(runner.name)", label: "Runner directory permissions", severity: .fail, message: "\(runner.target): directory is not writable.", fix: "Run `chmod u+w \(runner.directory)` or move the runner with `runnerctl repair \(runner.target)`."))
+        }
+
+        let runnerExecutable = "\(runner.directory)/run.sh"
+        if FileManager.default.fileExists(atPath: runnerExecutable) {
+            checks.append(DoctorCheck(id: "runner.executable.\(runner.name)", label: "Runner executable", severity: .info, message: "\(runner.target): run.sh exists.", fix: nil))
+        } else {
+            checks.append(DoctorCheck(id: "runner.executable.\(runner.name)", label: "Runner executable", severity: .fail, message: "\(runner.target): missing run.sh.", fix: "Run `runnerctl repair \(runner.target)` to reinstall the runner binary."))
+        }
+
+        return checks
+    }
+
+    private func checkProfiles(in state: RunnerctlState?) -> [DoctorCheck] {
+        guard let state, !state.profiles.isEmpty else {
+            return [DoctorCheck(id: "auth.profiles_none", label: "GitHub profiles", severity: .info, message: "No GitHub profiles saved yet.", fix: nil)]
+        }
+
+        return state.profiles.map { profile in
+            do {
+                _ = try GitHubCLICredentialDetector(executor: executor).detectCredential(account: profile.githubLogin)
+                return DoctorCheck(id: "auth.profile.\(profile.name)", label: "GitHub profile", severity: .info, message: "\(profile.name): @\(profile.githubLogin) available through gh.", fix: nil)
+            } catch {
+                return DoctorCheck(id: "auth.profile.\(profile.name)", label: "GitHub profile", severity: .fail, message: "\(profile.name): @\(profile.githubLogin) is not available through gh.", fix: "Run `runnerctl login --profile \(profile.name) --account \(profile.githubLogin)` after refreshing `gh auth login`.")
+            }
         }
     }
 }
@@ -164,15 +224,28 @@ struct HumanDoctorRenderer {
         lines.append("")
         lines.append("Home: \(response.home)")
         lines.append("")
-        for check in response.checks {
-            lines.append("\(marker(for: check.severity)) \(check.label): \(check.message)")
-            if let fix = check.fix {
-                lines.append("  Fix: \(fix)")
+        for group in groupedChecks(response.checks) {
+            lines.append("\(group.title):")
+            for check in group.checks {
+                lines.append("  \(marker(for: check.severity)) \(check.label): \(check.message)")
+                if let fix = check.fix {
+                    lines.append("    Fix: \(fix)")
+                }
             }
+            lines.append("")
         }
-        lines.append("")
         lines.append("Summary: \(response.summary.failCount) fail, \(response.summary.warnCount) warn, \(response.summary.infoCount) info")
         return lines.joined(separator: "\n")
+    }
+
+    private func groupedChecks(_ checks: [DoctorCheck]) -> [(title: String, checks: [DoctorCheck])] {
+        let groups: [(title: String, checks: [DoctorCheck])] = [
+            (title: "Host", checks: checks.filter { $0.id.hasPrefix("host.") }),
+            (title: "State", checks: checks.filter { $0.id.hasPrefix("state.") }),
+            (title: "Auth", checks: checks.filter { $0.id.hasPrefix("auth.") }),
+            (title: "Runners", checks: checks.filter { $0.id.hasPrefix("runner.") || $0.id.hasPrefix("runners.") })
+        ]
+        return groups.filter { !$0.checks.isEmpty }
     }
 
     private func marker(for severity: CheckSeverity) -> String {

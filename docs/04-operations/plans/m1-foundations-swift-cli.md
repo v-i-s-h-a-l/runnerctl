@@ -36,7 +36,7 @@ This decision is reversible before M2 only if a concrete toolchain/distribution 
 - Swift package scaffold exists.
 - `runnerctl login` detects and stores a `gh` profile.
 - `runnerctl login --check-target <owner/repo|org>` verifies runner API access by listing runners and creating then discarding a registration token.
-- `runnerctl doctor` runs initial macOS checks.
+- `runnerctl doctor` runs initial macOS checks and reports corrupt state, unavailable saved profiles, missing runner directories, and missing runner executables.
 - `scripts/session-start.sh --agent` emits terse JSON.
 
 ## Out Of Scope For This Pass

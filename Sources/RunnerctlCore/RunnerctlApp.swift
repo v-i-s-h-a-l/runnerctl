@@ -133,11 +133,13 @@ public struct RunnerctlApp {
 
     private func runDoctor(invocation: ParsedInvocation, stateStore: StateStore) -> Int {
         do {
-            _ = try stateStore.loadOrCreate()
+            try stateStore.ensureDirectories()
             let doctor = Doctor(stateStore: stateStore, executor: executor)
             let checks = doctor.runChecks()
-            try stateStore.updateLastDoctorRun(Date())
             let summary = DoctorSummary(checks: checks)
+            if !checks.contains(where: { $0.id == "state.parse" }) {
+                try stateStore.updateLastDoctorRun(Date())
+            }
             let response = DoctorResponse(
                 schemaVersion: 1,
                 command: "doctor",
