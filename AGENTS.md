@@ -1,89 +1,79 @@
-# Runnerctl Agent Instructions
+# Client Project — SDL Governance
 
-Runnerctl is meant to be operated through natural language in an AI coding agent. The CLI is the canonical execution layer, but the preferred user experience is: the user opens this repository in an agent and asks for runner lifecycle work in plain English.
+This repository is governed through SDL (stibdedlom). The contract is
+agent-neutral: it works with Kimi, Claude, Cursor, headless scripts, and any
+future agent that can shell out to `sdl-orchestrator check`.
 
-## Startup
+## Default SDL routing
 
-Before making changes or running lifecycle operations, read and follow:
+SDL is active by default. The user does not need to invoke a magic phrase.
+Treat every user prompt as an invocation-policy `user_prompt`: inquiry may
+answer after routing, planning routes through governance, and execution routes
+to the selected capability or role with a lifecycle record plus isolated
+branch/worktree before mutation.
+
+To opt out for a bounded session or task, say `SDL off for this task`.
+
+## Project reference
 
 ```text
-docs/00-context/agent-startup.md
+project://v-i-s-h-a-l/runnerctl
 ```
 
-Then run the read-only startup helper for current status:
+## Memory boundary
 
-```sh
-./scripts/session-start.sh
+Project memory is stored out-of-band at:
+
+```text
+/Users/vishalsingh/.stibdedlom/project-memory/v-i-s-h-a-l/runnerctl
 ```
 
-All durable project memory belongs under `docs/`. Do not store important context only in one agent's private memory.
+No client data, secrets, or project memory may be committed to this repository.
 
-## Change Workflow
+## Agent integration contract
 
-For any file-changing work, follow [Change workflow](docs/04-operations/change-workflow.md).
+The repository declares its SDL contract in `.stibdedlom/manifest.yaml` under
+the `agent_integration` section. Any agent can discover:
 
-Non-negotiables:
+- `memory_root` — where project memory and trust material live.
+- `check_command` — how to invoke `sdl-orchestrator check`.
+- `attested` — whether mutations require a valid routing attestation.
 
-- Never commit directly to `main`.
-- Check branch and worktree status before editing.
-- Create a task branch or worktree before changing files.
-- Create or update a plan under `docs/04-operations/plans/`.
-- Get sibling-agent plan review with explicit `PASS` before implementation.
-- Get sibling-agent implementation review with explicit `PASS` before PR creation.
-- Push the branch and create a PR.
-- Merge automatically after implementation review passes, required checks pass, and the PR is mergeable.
-- If checks are pending, enable platform auto-merge when available.
-- Stop before merge only if the user explicitly asks.
-- After merge, sync `main`, delete the local task branch/worktree, and remove scratch artifacts.
+Example `sdl-orchestrator check` invocation:
 
-## Current Command Surface
-
-Use `--json` for Runnerctl commands whenever possible.
-
-Implemented now:
-
-```sh
-swift run runnerctl --help
-swift run runnerctl login --json
-swift run runnerctl login --check-target OWNER/REPO --json
-swift run runnerctl login --check-target ORG --scope org --json
-swift run runnerctl doctor --json
+```text
+sdl-orchestrator check \
+  --tool file_write \
+  --tool-args '{"path": "docs/example.md", "content": "hello"}' \
+  --target-paths docs/example.md \
+  --task-ref issues/123 \
+  --intent-class execution
 ```
 
-Planned but not implemented yet:
+## Modes
 
-```sh
-runnerctl add <target>
-runnerctl list
-runnerctl status [target]
-runnerctl repair <target>
-runnerctl remove <target>
-runnerctl update runner
-runnerctl update self
-runnerctl agents init
+- **Attested mode** (`agent_integration.attested: true`): the agent has a valid
+  routing attestation for the current branch/task. Call `sdl-orchestrator check`
+  before every mutation. The kernel returns `allow`, `block`, or `escalate`.
+- **Unattested mode** (`agent_integration.attested: false`): only read-only and
+  diagnostic operations are permitted until an attestation is created.
+
+## Picking up a classified issue
+
+When an issue carries an SDL classification block, route it through SDL:
+
+```text
+/sdl-pickup <issue-url>
 ```
 
-Until a release binary exists, use `swift run runnerctl ...` from the repository root.
+This extracts the classification block, routes the goal, and initializes a
+lifecycle record. Agents without `/sdl-pickup` support can create the lifecycle
+record manually via `scripts/lifecycle/new-record.sh` in the infra repo.
 
-## Natural-Language Routing
+## Authority
 
-Map user requests like this:
-
-| User asks | Agent should do |
-| --- | --- |
-| "Where are we?" / "status?" | Run startup helper, inspect roadmap/status, summarize current milestone and next step. |
-| "Check this Mac" / "Is this machine ready?" | Run `swift run runnerctl doctor --json`, summarize host/state/auth/runner checks and fixes. |
-| "Log in" / "Use my GitHub account" | Run `swift run runnerctl login --json`; if target is mentioned, include `--check-target`. |
-| "Can this account manage runners for OWNER/REPO?" | Run `swift run runnerctl login --check-target OWNER/REPO --json`. |
-| "Can this account manage org runners for ORG?" | Run `swift run runnerctl login --check-target ORG --scope org --json`. |
-| "Set up a runner for OWNER/REPO" | Current state: explain `add` is not implemented yet, then run `doctor` and `login --check-target OWNER/REPO` to prepare. |
-| "List/status/repair/remove runners" | Current state: explain the lifecycle command is planned but not implemented, then run `doctor` for available local diagnostics. |
-| "What should we build next?" | Read roadmap and recent docs, then recommend the next scoped milestone task. |
-
-## Output Contract
-
-- Do not make the user memorize commands.
-- Explain what you ran and what it means in plain English.
-- Ask only for missing target/account/destructive-confirmation details.
-- For destructive future commands, show the planned local and GitHub changes before executing.
-- If a command is not implemented yet, say that directly and run the closest available readiness or permission check.
+- Live mutations require explicit bounded authorization.
+- Commits that change governed files must carry `SDL-Commit-Author` and
+  `SDL-Routing-Attestation` trailers.
+- Merges require independent review and merge-queue submission.
+- Promotion and provider dispatch follow the SDL lifecycle gates.
